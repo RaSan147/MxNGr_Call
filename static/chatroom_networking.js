@@ -12,25 +12,37 @@ document.addEventListener("DOMContentLoaded", (event)=>{
 var camera_allowed=false; 
 var mediaConstraints = {
     audio: true,
-    video: {
-        height: 360
-    }
+    video: { width: 1280, height: 720 }
 };
 
 function startCamera()
 {
-    navigator.mediaDevices.getUserMedia(mediaConstraints)
-    .then((stream)=>{
-        myVideo.srcObject = stream;
-        camera_allowed = true;
-        setAudioMuteState(audioMuted);                
-        setVideoMuteState(videoMuted);
-        //start the socketio connection
-        socket.connect();
-    })
-    .catch((e)=>{
-        console.log("getUserMedia Error! ", e);
-    });
+    let video = true
+    function getCamera(){
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            console.log("Browser API navigator.mediaDevices.getUserMedia not available");
+            return;
+        }
+        navigator.mediaDevices.getUserMedia(mediaConstraints)
+        .then((stream)=>{
+            myVideo.srcObject = stream;
+            camera_allowed = true;
+            setAudioMuteState(audioMuted);                
+            setVideoMuteState(videoMuted);
+            //start the socketio connection
+            socket.connect();
+        })
+        .catch((e)=>{
+            console.log("getUserMedia Error! ", e);
+            video = false;
+        });
+}
+
+    getCamera();
+    if(!video){
+        mediaConstraints.video = false;
+        getCamera();
+    }
 }
 
 socket.on("connect", ()=>{
@@ -47,13 +59,14 @@ socket.on("user-connect", (data)=>{
 socket.on("user-disconnect", (data)=>{
     console.log("user-disconnect ", data);
     let peer_id = data["sid"];
+    //alert("user disconnected")
     closeConnection(peer_id);
     removeVideoElement(peer_id);
 });
 socket.on("user-list", (data)=>{
     console.log("user list recvd ", data);
     myID = data["my_id"];
-    if( "list" in data) // not the first to connect to room, existing user list recieved
+    if( "list" in data) // not the first to connect to room, existing user list received
     {
         let recvd_list = data["list"];  
         // add existing users to user list
@@ -177,7 +190,7 @@ function handleOfferMsg(msg)
 {   
     peer_id = msg['sender_id'];
 
-    console.log(`offer recieved from <${peer_id}>`);
+    console.log(`offer received from <${peer_id}>`);
     
     createPeerConnection(peer_id);
     let desc = new RTCSessionDescription(msg['sdp']);
@@ -203,7 +216,7 @@ function handleOfferMsg(msg)
 function handleAnswerMsg(msg)
 {
     peer_id = msg['sender_id'];
-    console.log(`answer recieved from <${peer_id}>`);
+    console.log(`answer received from <${peer_id}>`);
     let desc = new RTCSessionDescription(msg['sdp']);
     _peer_list[peer_id].setRemoteDescription(desc)
 }
@@ -223,7 +236,7 @@ function handleICECandidateEvent(event, peer_id)
 
 function handleNewICECandidateMsg(msg)
 {
-    console.log(`ICE candidate recieved from <${peer_id}>`);
+    console.log(`ICE candidate received from <${peer_id}>`);
     var candidate = new RTCIceCandidate(msg.candidate);
     _peer_list[msg["sender_id"]].addIceCandidate(candidate)
     .catch(log_error);
@@ -232,7 +245,7 @@ function handleNewICECandidateMsg(msg)
 
 function handleTrackEvent(event, peer_id)
 {
-    console.log(`track event recieved from <${peer_id}>`);
+    console.log(`track event received from <${peer_id}>`);
     
     if(event.streams)
     {

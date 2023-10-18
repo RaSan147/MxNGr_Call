@@ -1,5 +1,5 @@
 
-$('#local_vid').draggable({
+/*$('#local_vid').draggable({
   containment: 'body',
   zIndex: 10000,
   // set start position at bottom right
@@ -7,7 +7,56 @@ $('#local_vid').draggable({
     ui.position.left = $(window).width() - ui.helper.width();
     ui.position.top = $(window).height() - ui.helper.height();
   },
-});
+}).draggable("option", "delay", 600);*/
+
+function touchHandler(event) {
+    var touch = event.changedTouches[0];
+
+    var simulatedEvent = document.createEvent("MouseEvent");
+        simulatedEvent.initMouseEvent({
+        touchstart: "mousedown",
+        touchmove: "mousemove",
+        touchend: "mouseup"
+    }[event.type], true, true, window, 1,
+        touch.screenX, touch.screenY,
+        touch.clientX, touch.clientY, false,
+        false, false, false, 0, null);
+
+    //event.preventDefault();
+
+    touch.target.dispatchEvent(simulatedEvent);
+}
+
+function patchElementTouchDrag(elem) {
+    elem.addEventListener("touchstart", touchHandler, true);
+    elem.addEventListener("touchmove", touchHandler, true);
+    elem.addEventListener("touchend", touchHandler, true);
+    elem.addEventListener("touchcancel", touchHandler, true);
+}
+
+
+function makeDragable(elem) {
+	patchElementTouchDrag(elem)
+
+	$(elem).draggable({
+		containment: 'body',
+  zIndex: 100,
+  // set start position at bottom right
+  start: function (event, ui) {
+    //Stop the touchmove event:
+  	$('body').bind('touchmove', function(e){e.preventDefault()});
+    ui.position.left = $(window).width() - ui.helper.width();
+    ui.position.top = $(window).height() - ui.helper.height();
+  },
+		stop: function (e) {
+      //Unbind to re-enable scrolling
+      $('body').unbind('touchmove');
+		},
+	});
+}
+
+makeDragable(document.getElementById("local_vid"))
+
 
 function checkVideoLayout() {
 

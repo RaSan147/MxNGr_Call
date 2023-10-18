@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Join a Call</title>
+</head>
+<body>
+	<h2 style="text-decoration: underline;">Join A Call</h2>
+	<form action="join" method="get">
+		<label for="room_id">Room ID:</label>
+		<input type="text" name="room_id" id="roomID" required>
+		<label for="display_name">Your Name</label>
+		<input type="text" name="display_name" id="display_name" required>
+
+		<!-- video and audio mute toggle switch -->
+		<label for="mute_video">Video</label>
+		<input type="checkbox" name="mute_video" id="video" checked>
+		<label for="mute_audio">Audio</label>
+		<input type="checkbox" name="mute_audio" id="audio" checked>
+
+		<button type="submit">Join</button>
+
+
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+	<title>Test</title>
+	<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+	<script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+	<script src="//code.jquery.com/ui/1.12.0-beta.1/jquery-ui.js"></script>
+
+<body>
+	<div data-role="page">
+		<div role="main" class="ui-content">
+			<div class="ui-grid-a">
+				<div class="ui-block-a">
+					<ul data-role="listview" style="height:500px;overflow-y: auto;">
+					</ul>
+				</div>
+				<div class="ui-block-b" style="background:gray; height:500px">
+					<ul data-role="listview" style="height:500px;overflow-y: auto;">
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+
+
+<script>
+//http://stackoverflow.com/questions/5186441/javascript-drag-and-drop-for-touch-devices
+
+function touchHandler(event) {
+    var touch = event.changedTouches[0];
+
+    var simulatedEvent = document.createEvent("MouseEvent");
+        simulatedEvent.initMouseEvent({
+        touchstart: "mousedown",
+        touchmove: "mousemove",
+        touchend: "mouseup"
+    }[event.type], true, true, window, 1,
+        touch.screenX, touch.screenY,
+        touch.clientX, touch.clientY, false,
+        false, false, false, 0, null);
+
+    if (event.target.nodeName != 'LI' ) {
+        event.preventDefault();
+    }
+
+    touch.target.dispatchEvent(simulatedEvent);
+}
+
+function patchElementTouchDrag(elem) {
+    elem.addEventListener("touchstart", touchHandler, true);
+    elem.addEventListener("touchmove", touchHandler, true);
+    elem.addEventListener("touchend", touchHandler, true);
+    elem.addEventListener("touchcancel", touchHandler, true);
+}
+
+
+function makeDragable(elem) {
+	patchElementTouchDrag(elem)
+
+	$(elem).draggable({
+		disabled:false,
+		delay: 2000,
+		cursor: 'move',
+		revert: true,
+		start: function (e) {
+			console.log('draggable start');
+                        //Stop the touchmove event:
+                        $('body').bind('touchmove', function(e){e.preventDefault()});
+		},
+		stop: function (e) {
+			console.log('draggable stop');
+                        //Unbind to re-enable scrolling
+                        $('body').unbind('touchmove');
+			//clearAll();
+		},
+	});
+}
+
+
+
+$(document).ready(function () {
+	console.log('ready');
+
+/*
+	$('li').bind('taphold', function (event, ui) {
+		console.log('taphold');
+		clearAll();
+		$(this).addClass('catched')
+		$(this).draggable('enable');
+*/
+// aproach from http://stackoverflow.com/a/9922048/582727
+// doesn't work at least on ios
+/*
+    var offset = $(this).offset();
+    var type   = $.mobile.touchEnabled ? 'touchstart' : 'mousedown';
+    var newevent = $.Event(type);
+    newevent.which  = 1;
+    newevent.target = this;
+    newevent.pageX  = event.pageX ? event.pageX : offset.left;
+    newevent.pageY  = event.pageY ? event.pageX : offset.top;
+
+    $(this).trigger(newevent);
+*/
+/////////////////////////////////////
+//	});
+
+	$('li')
+
+	
+})
+
+
+
+
+
+</script>

@@ -3,6 +3,9 @@ var myVideo;
 document.addEventListener("DOMContentLoaded", (event) => {
     myVideo = document.getElementById("local_vid");
     myVideo.onloadeddata = () => { console.log("W,H: ", myVideo.videoWidth, ", ", myVideo.videoHeight); };
+    
+    
+    
     // var muteBttn = document.getElementById("bttn_mute");
     // var muteVidBttn = document.getElementById("bttn_vid_mute");
     // var callEndBttn = document.getElementById("call_end");
@@ -31,18 +34,28 @@ function makeVideoElementCustom(element_id, display_name) {
 }
 
 function addVideoElement(element_id, display_name) {
+    console.log("addVideoElement: ", element_id);
     document.getElementById("video_grid").appendChild(makeVideoElementCustom(element_id, display_name));
     checkVideoLayout();
 }
 function removeVideoElement(element_id) {
+    console.log("removeVideoElement: ", element_id);
     let v = getVideoObj(element_id);
+    if (!v) {
+        return;
+    }
+    v.pause()
     if (v.srcObject) {
         v.srcObject.getTracks().forEach(track => track.stop());
+        v.removeAttribute("srcObject");
     }
-    v.removeAttribute("srcObject");
+    
     v.removeAttribute("src");
+    v.load()
 
-    document.getElementById("vid_" + element_id).remove();
+    v.remove();
+    
+    checkVideoLayout();
 }
 
 function getVideoObj(element_id) {
@@ -54,11 +67,11 @@ function setAudioMuteState(flag) {
     console.log("setAudioMuteState: ", local_stream);
     local_stream.getAudioTracks().forEach((track) => { track.enabled = !flag; });
     // switch button icon
-    document.getElementById("mute_icon").innerText = (flag) ? "mic_off" : "mic";
+    // document.getElementById("mute_icon").innerText = (flag) ? "mic_off" : "mic";
 }
 function setVideoMuteState(flag) {
     let local_stream = myVideo.srcObject;
     local_stream.getVideoTracks().forEach((track) => { track.enabled = !flag; });
     // switch button icon
-    document.getElementById("vid_mute_icon").innerText = (flag) ? "videocam_off" : "videocam";
+    // document.getElementById("vid_mute_icon").innerText = (flag) ? "videocam_off" : "videocam";
 }
